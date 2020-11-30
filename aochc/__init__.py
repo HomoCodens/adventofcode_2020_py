@@ -6,27 +6,27 @@ import os
 import importlib
 
 def run_one():
-    parser = ArgumentParser(description="Advent of Code 2020")
+    parser = ArgumentParser(description='Advent of Code 2020')
     now = datetime.now()
 
     parser.add_argument(
-        "-m", "--mod",
-        action="store_true"
+        '-m', '--mod',
+        action='store_true'
     )
     parser.add_argument(
-        "day",
-        nargs="?",
+        'day',
+        nargs='?',
         type=int,
         choices=range(1, 26),
         default=min(now.day, 25) if now.month == 12 else 1,
-        help="1-25 (default: %(default)s)",
+        help='1-25 (default: %(default)s)',
     )
     parser.add_argument(
-        "to",
-        nargs="?",
+        'to',
+        nargs='?',
         type=int,
         choices=range(1, 26),
-        help="1-25 (default: %(default)s)",
+        help='1-25 (default: %(default)s)',
     )
     args = parser.parse_args()
 
@@ -34,14 +34,14 @@ def run_one():
         args.to = args.day
 
     if args.to < args.day:
-        print("Second day must be larger an first!")
+        print('Second day must be larger an first!')
         sys.exit()
 
     for i in range(args.day, args.to + 1):
-        module_name = f"aochc.aoc2019.day{i:02}"
+        module_name = f'aochc.aoc2019.day{i:02}'
 
         if args.mod:
-            runpy.run_module(module_name, run_name="__main__")
+            runpy.run_module(module_name, run_name='__main__')
         else:
             mod = importlib.import_module(module_name)
             mod_contents = dir(mod)
@@ -49,23 +49,23 @@ def run_one():
             prepare_data = False
 
             print(i)
-            infile = os.path.join(os.path.dirname(__file__), "aoc2020", "input", f"day{i:02}.txt")
-            with open(infile, "r") as inf:
+            infile = os.path.join(os.path.dirname(__file__), 'aoc2020', 'input', f'day{i:02}.txt')
+            with open(infile, 'r') as inf:
                 data = inf.readlines()
                 
-            if "prepare" in mod_contents:
-                print("Found input preparationer")
+            if 'prepare' in mod_contents:
+                print('Found input preparationer')
                 prepare_data = True
 
-            if "part_a" in mod_contents:
+            if 'part_a' in mod_contents:
                 p1 = mod.part_a(data if not prepare_data else mod.prepare(data))
             
-            print("Part 1:", p1)
+            print('Part 1:', p1)
 
-            if "part_b" in mod_contents:
+            if 'part_b' in mod_contents:
                 p2 = mod.part_b(data if not prepare_data else mod.prepare(data))
 
-            print("Part 2:", p2)
+            print('Part 2:', p2)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_one()
