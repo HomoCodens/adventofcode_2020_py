@@ -1,20 +1,20 @@
+import itertools
+import numpy as np
+
+def find_2020(data, n):
+    combinations = itertools.combinations(data, n)
+    for combi in combinations:
+        if sum(list(combi)) == 2020:
+            return np.prod(list(combi))
+
 def prepare(raw):
     return [int(x) for x in raw]
 
 def part_a(expenses):
-    n_exp = len(expenses)
-    for i in range(0, n_exp-1):
-        for j in range(i, n_exp):
-            if expenses[i] + expenses[j] == 2020:
-                return expenses[i]*expenses[j]
-    
+    return find_2020(expenses, 2)
+
 def part_b(expenses):
-    n_exp = len(expenses)
-    for i in range(0, n_exp-2):
-        for j in range(i, n_exp-1):
-            for k in range(j, n_exp):
-                if expenses[i] + expenses[j] + expenses[k] == 2020:
-                    return expenses[i]*expenses[j]*expenses[k]
+    return find_2020(expenses, 3)
 
 if __name__ == '__main__':
     example1 = ['1721',
@@ -28,3 +28,5 @@ if __name__ == '__main__':
 
     assert part_a(example1_dat) == 514579
     assert part_b(example1_dat) == 241861950
+
+    print('Day 1 tests passed!')
