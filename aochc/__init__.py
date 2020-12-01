@@ -38,7 +38,7 @@ def run_one():
         sys.exit()
 
     for i in range(args.day, args.to + 1):
-        module_name = f'aochc.aoc2019.day{i:02}'
+        module_name = f'aochc.aoc2020.day{i:02}'
 
         if args.mod:
             runpy.run_module(module_name, run_name='__main__')
@@ -60,12 +60,12 @@ def run_one():
             if 'part_a' in mod_contents:
                 p1 = mod.part_a(data if not prepare_data else mod.prepare(data))
             
-            print('Part 1:', p1)
+                print('Part 1:', p1)
 
             if 'part_b' in mod_contents:
                 p2 = mod.part_b(data if not prepare_data else mod.prepare(data))
 
-            print('Part 2:', p2)
+                print('Part 2:', p2)
 
 if __name__ == '__main__':
     run_one()
