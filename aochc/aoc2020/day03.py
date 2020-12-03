@@ -5,8 +5,8 @@ def prepare(input):
 
 def count_trees(map, right, down):
     n_rows, n_cols = map.shape
-    r = list(np.array(range(down, n_rows, down)))
-    c = list(np.array(range(right, len(r)*right + right, right)) % n_cols)
+    r = np.array(range(down, n_rows, down))
+    c = np.array(range(right, len(r)*right + right, right)) % n_cols
     return np.sum(map[r, c] == '#', dtype='int64')
 
 def part_a(map):
