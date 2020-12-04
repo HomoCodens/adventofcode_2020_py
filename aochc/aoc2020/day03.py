@@ -1,7 +1,7 @@
 import numpy as np
 
 def prepare(input):
-    return np.array([list(x) for x in input])
+    return np.array([list(x) for x in input.splitlines()])
 
 def count_trees(map, right, down):
     n_rows, n_cols = map.shape
@@ -25,17 +25,18 @@ def part_b(map):
     
 
 if __name__ == '__main__':
-    example1 = ['..##.......',
-                '#...#...#..',
-                '.#....#..#.',
-                '..#.#...#.#',
-                '.#...##..#.',
-                '..#.##.....',
-                '.#.#.#....#',
-                '.#........#',
-                '#.##...#...',
-                '#...##....#',
-                '.#..#...#.#']
+    example1 = '''..##.......
+#...#...#..
+.#....#..#.
+..#.#...#.#
+.#...##..#.
+..#.##.....
+.#.#.#....#
+.#........#
+#.##...#...
+#...##....#
+.#..#...#.#
+'''
 
     assert part_a(prepare(example1)) == 7
     assert part_b(prepare(example1)) == 336

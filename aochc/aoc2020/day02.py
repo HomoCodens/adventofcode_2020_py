@@ -11,7 +11,7 @@ def line_to_input(line):
     }
 
 def prepare(input):
-    return [line_to_input(l) for l in input]
+    return [line_to_input(l) for l in input.splitlines()]
 
 def is_valid_sled(spec):
     letter_matches = sum([letter == spec['letter'] for letter in spec['password']])
@@ -30,7 +30,10 @@ def part_b(specs):
     return sum([is_valid_toboggan(x) for x in specs])
 
 if __name__ == '__main__':
-    example1 = ['1-3 a: abcde\n', '1-3 b: cdefg\n', '2-9 c: ccccccccc\n']
+    example1 = '''1-3 a: abcde
+1-3 b: cdefg
+2-9 c: ccccccccc
+'''
 
     assert part_a(prepare(example1)) == 2
     assert part_b(prepare(example1)) == 1

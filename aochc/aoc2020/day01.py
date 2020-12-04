@@ -8,7 +8,7 @@ def find_2020(data, n):
             return np.prod(list(combi))
 
 def prepare(raw):
-    return [int(x) for x in raw]
+    return [int(x) for x in raw.splitlines()]
 
 def part_a(expenses):
     return find_2020(expenses, 2)
@@ -17,12 +17,13 @@ def part_b(expenses):
     return find_2020(expenses, 3)
 
 if __name__ == '__main__':
-    example1 = ['1721',
-                '979',
-                '366',
-                '299',
-                '675',
-                '1456']
+    example1 = '''1721
+979
+366
+299
+675
+1456
+'''
 
     example1_dat = prepare(example1)
 

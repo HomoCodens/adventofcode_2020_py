@@ -51,10 +51,9 @@ def run_one():
             print(i)
             infile = os.path.join(os.path.dirname(__file__), 'aoc2020', 'input', f'day{i:02}.txt')
             with open(infile, 'r') as inf:
-                data = inf.read().splitlines()
+                data = inf.read()
                 
             if 'prepare' in mod_contents:
-                print('Found input preparationer')
                 prepare_data = True
 
             if 'part_a' in mod_contents:
