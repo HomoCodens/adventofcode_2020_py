@@ -19,78 +19,91 @@ def prepare(batch):
         end += 1
     return docs
 
-required_fields = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
-passport_fields = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid', 'cid']
 
-def validate_document(doc, part):
-    has_all_fields = set(required_fields) == set(doc.keys()) or set(passport_fields) == set(doc.keys())
-    if part == 1 or not has_all_fields:
-        #print('dont have the fields')
-        return has_all_fields
+def validate_fields(doc, verbose = False):
+    required_fields = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
+    passport_fields = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid', 'cid']
+    has_all_fields =  set(required_fields) == set(doc.keys()) or set(passport_fields) == set(doc.keys())
     
-    byr = int(doc['byr'])
-    if byr < 1920 or byr > 2002:
-        #print('fail at byr')
+    if verbose:
+        print(f'Has all required fields: {has_all_fields}')
+    
+    return has_all_fields
+
+def validate_number(nmbr_in, min, max, verbose = False):
+    nmbr = int(nmbr_in)
+
+    if verbose:
+        if nmbr is None:
+            print(f'Not a valid number: {nmbr_in}')
+        elif nmbr < min or nmbr > max:
+            print(f'Number outside of range: {nmbr}, [{min}, {max}]')
+        else:
+            print(f'number is ok {min} <= {nmbr} <= {max}')
+
+    return nmbr is not None and nmbr >= min and nmbr <= max
+
+def validate_regex(field_in, pattern, verbose = False):
+    match = re.match(pattern, field_in)
+    if verbose:
+        if match is None:
+            print(f'{field_in} failed to match {pattern}')
+        else:
+            print('Regex match ok')
+
+    return match
+
+def validate_height(height, verbose = False):
+    match = validate_regex(height, r'(?P<hgt>\d+)(?P<unit>(cm|in))')
+    if match is None:
         return False
 
-    iyr = int(doc['iyr'])
-    if iyr < 2010 or iyr > 2020:
-        #print('fail at iyr')
-        #print(iyr)
-        return False
+    groups = match.groupdict()
+    if groups['unit'] == 'cm': # 'cause metric should always come first
+        return validate_number(groups['hgt'], 150, 193, verbose)
+    elif groups['unit'] == 'in':
+        return validate_number(groups['hgt'], 59, 76, verbose)
 
-    eyr = int(doc['eyr'])
-    if eyr < 2020 or eyr > 2030:
-        #print('fail at eyr')
-        #print(eyr)
-        return False
+    return False # Appease the unreachable code gods (and edge cases *shrug*)
 
-    hgt = doc['hgt']
-    mtch = re.match(r'(?P<hgt>\d+)(?P<unit>(cm|in))', hgt)
-    if mtch is None:
-        #print('height wrong format')
-        #print(hgt)
-        return False
-    else:
-        print(hgt)
-    grps = mtch.groupdict()
-    unit = grps['unit']
-    hgt = int(grps['hgt']) # And Rust goes WILD!
+validators = {
+    'byr': lambda byr, verbose = False : validate_number(byr, 1920, 2002, verbose),
+    'iyr': lambda iyr, verbose = False : validate_number(iyr, 2010, 2020, verbose),
+    'eyr': lambda eyr, verbose = False : validate_number(eyr, 2020, 2030, verbose),
+    'hgt': lambda hgt, verbose = False : validate_height(hgt, verbose),
+    'hcl': lambda hcl, verbose = False : validate_regex(hcl, r'^#[0-9a-f]{6}$', verbose) is not None,
+    'ecl': lambda ecl, verbose = False : validate_regex(ecl, r'(amb|blu|brn|gry|grn|hzl|oth)', verbose) is not None,
+    'pid': lambda pid, verbose = False : validate_regex(pid, r'^\d{9}$', verbose) is not None
+}
 
-    if (unit == 'cm' and (hgt < 150 or hgt > 193)) or (unit == 'in' and (hgt < 59 or hgt > 76)):
-        #print('fail at height')
-        #print(doc['hgt']) # And Rust is (sort of) validated!!!
-        return False
-    else:
-        print(doc['hgt'])
-    hcl = doc['hcl']
-    if re.match(r'^#[0-9a-f]{6}$', hcl) is None:
-        #print('fail at hcl')
-        #print(hcl)
-        return False
+def validate_document(doc, part, verbose = False):
+    if verbose:
+        print(doc)
 
-    ecl = doc['ecl']
-    if not ecl in ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth']:
-        #print('fail at ecl')
-        #print(ecl)
-        return False
+    fields = validate_fields(doc, verbose)
+    if part == 1 or not fields:
+        return fields
+    
+    for field in validators.keys():
+        if verbose:
+            print(f'checking field {field}')
 
-    pid = doc['pid']
-    if not len(pid) == 9:
-        #print('fail at pid')
-        #print(pid)
-        return False
+        if not validators[field](doc[field], verbose):
+            if verbose:
+                print('Rejecting!')
+            return False
 
     return True
 
 def part_a(docs):
+    # Summing booleans NEVER gets old ;P
     return sum([validate_document(x, 1) for x in docs])
 
 def part_b(docs):
     return sum([validate_document(x, 2) for x in docs])
 
 if __name__ == '__main__':
-    example1 = '''ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
+    example1 = prepare('''ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
 byr:1937 iyr:2017 cid:147 hgt:183cm
 
 iyr:2013 ecl:amb cid:350 eyr:2023 pid:028048884
@@ -103,7 +116,7 @@ hgt:179cm
 
 hcl:#cfa07d eyr:2025 pid:166559648
 iyr:2011 ecl:brn hgt:59in
-'''
+''')
 
     invalid_docs = prepare('''eyr:1972 cid:100
 hcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926
@@ -134,8 +147,27 @@ eyr:2022
 iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
 ''')
 
-    #print(invalid_docs)
-    print([validate_document(x, 2) for x in invalid_docs])
+    assert part_a(example1) == 2
 
-    print([validate_document(x, 2) for x in valid_docs])
+    assert validators['byr'](2002)
+    assert not validators['byr'](2003)
 
+    assert validators['hgt']('60in')
+    assert validators['hgt']('190cm')
+    assert not validators['hgt']('190in')
+    assert not validators['hgt']('190')
+
+    assert validators['hcl']('#123abc')
+    assert not validators['hcl']('#123abz')
+    assert not validators['hcl']('123abc')
+
+    assert validators['ecl']('brn')
+    assert not validators['ecl']('wat')
+
+    assert validators['pid']('000000001')
+    assert not validators['pid']('0123456789')
+
+    assert part_b(invalid_docs) == 0
+    assert part_b(valid_docs) == 4
+
+    print('Day 4 pass')
