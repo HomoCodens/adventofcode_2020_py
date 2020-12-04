@@ -72,7 +72,7 @@ validators = {
     'eyr': lambda eyr, verbose = False : validate_number(eyr, 2020, 2030, verbose),
     'hgt': lambda hgt, verbose = False : validate_height(hgt, verbose),
     'hcl': lambda hcl, verbose = False : validate_regex(hcl, r'^#[0-9a-f]{6}$', verbose) is not None,
-    'ecl': lambda ecl, verbose = False : validate_regex(ecl, r'(amb|blu|brn|gry|grn|hzl|oth)', verbose) is not None,
+    'ecl': lambda ecl, verbose = False : validate_regex(ecl, r'^(amb|blu|brn|gry|grn|hzl|oth)$', verbose) is not None,
     'pid': lambda pid, verbose = False : validate_regex(pid, r'^\d{9}$', verbose) is not None
 }
 
