@@ -1,5 +1,8 @@
 import numpy as np
 
+# NB: The whole row-seat thing is actually superfluous ^^
+#     https://www.reddit.com/r/adventofcode/comments/k73xyd/day_5_part_1_in_7_bytes/
+
 def thing_to_number(x):
     bits = np.array([1 if l in ['B', 'R'] else 0 for l in x])
     pot = 2 ** np.array(range(len(x) - 1, -1, -1)) # *sigh*
