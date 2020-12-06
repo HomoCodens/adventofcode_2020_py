@@ -1,3 +1,5 @@
+import functools
+
 def prepare(answers):
     return ' '.join(answers.splitlines()).split('  ')
 
@@ -5,11 +7,7 @@ def get_n_yes_in_group(group_answers):
     return len(set([l for l in group_answers.replace(' ', '')]))
 
 def get_n_everyone_yes(group_answers):
-    individual_answers = [set([l for l in a]) for a in group_answers.split(' ')]
-    all_yes = individual_answers[0]
-    for i in range(1, len(individual_answers)):
-        all_yes = all_yes & individual_answers[i]
-    return len(all_yes)
+    return len(functools.reduce(lambda a, b: a & b, [set([l for l in a]) for a in group_answers.split(' ')]))
 
 
 def part_a(answers):
