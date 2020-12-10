@@ -64,7 +64,7 @@ if __name__ == '__main__':
 '''
     data = prepare(example1)
 
-    assert find_invalid(data, 5)) == 127
+    assert find_invalid(data, 5) == 127
 
     assert smash(data, find_invalid(data, 5)) == 62
 
