@@ -1,87 +1,97 @@
-# For those too lazy to mess with indices
-from itertools import dropwhile, cycle, islice
+def prepare(input):
+    return [int(x) for x in input.strip()]
 
-def prepare(nmbrs):
-    return [int(x) for x in nmbrs.strip()]
+def doit(sequence, n_values, times):
+    if len(sequence) < n_values:
+        sequence = sequence + list(range(max(sequence) + 1, n_values + 1))
+    state = [{
+        'number': x[1],
+        'at': x[0],
+        'next': x[0] + 1
+    } for x in enumerate(sequence)]
 
-def step(numbers, current):
-    #print(numbers)
-    #print(current)
 
-    n = len(numbers)
-    rmvd = []
-    rest = []
-    i = 0
-    for x in dropwhile(lambda x: x != current, cycle(numbers)):
-        if x == current and len(rest) > 0:
-            break
+    state[-1]['next'] = 0
+
+    if n_values <= 20:
+        crawly_print(state, state[0]['number'])
+    
+    lookup = len(state)*[None]
+    for x in state:
+        lookup[x['number'] - 1] = x
+
+    current = state[0]
+    for i in range(times):
+        first_removed = state[current['next']]
+
+        # shites and giggles
+        nmbrs_removed = [
+            first_removed['number'],
+            state[first_removed['next']]['number'],        
+            state[state[first_removed['next']]['next']]['number']
+        ]
         
-        if i in [1, 2, 3]:
-            #print(f'putting {x} into removed')
-            rmvd.append(x)
-        else:
-            #print(f'putting {x} into rest', flush=True)
-            rest.append(x)
+        last_removed = lookup[nmbrs_removed[-1] - 1]
+        after_removed = state[last_removed['next']]
 
-        i += 1
+        target_n = current['number']
+        while True:
+            target_n -= 1
+            if target_n == 0:
+                target_n = n_values
+            if not target_n in nmbrs_removed:
+                break
 
-    #print(rmvd)
-    #print(rest)
+        target = lookup[target_n - 1]
 
-    nxt = current - 1
-    #print(nxt)
-    #print(nxt in rmvd)
-    while nxt in rmvd or nxt == 0:
-        #print(nxt, flush=True)
-        nxt -= 1
-        if nxt <= 0:
-            nxt = n
-    #print(f'next is {nxt}')
+        after_target = state[target['next']]
 
-    nxt_state = []
-    r = list(islice(dropwhile(lambda x: x != nxt, cycle(rest)), n - 3))
-    #print(r)
-    for x in r:
-        #print(f'building with {x}')
-        nxt_state.append(x)
-        if x == nxt:
-            #print(f'also, appending {rmvd}')
-            nxt_state = nxt_state + rmvd
+        target['next'] = first_removed['at']
+        last_removed['next'] = after_target['at']
+        current['next'] = after_removed['at']
+        current = state[current['next']]
         
-    #print(nxt_state)
+        if n_values <= 20:
+            print()
+            print(f'-- move {i+2} --')
+            crawly_print(state, current['number'])
+        elif (i % 10000) == 0:
+            print(i, flush = True)
+    return (state, lookup)
 
-    nxt_current = nxt
-    picknext = False # Silly, i know
-    for x in cycle(nxt_state):
-        if x == current:
-            picknext = True
-        elif picknext:
-            nxt_current = x
-            break
-
-    return (nxt_state, nxt_current)
-
-def step_times(numbers, n):
-    current = numbers[0]
-    for i in range(n):
-        numbers, current = step(numbers, current)
-        print(i)
-    return numbers
+def crawly_print(state, current_number):
+    st = ''
+    ii = 0
+    for i in range(len(state)):
+        x = state[ii]['number']
+        st_x = '(' + str(x) + ')' if x == current_number else str(x)
+        st += st_x + ' '
+        ii = state[ii]['next']
+    print(st)
 
 def part_a(numbers):
-    numbers = step_times(numbers, 100)
-    out = ''
-    for x in list(islice(dropwhile(lambda x: x != 1, cycle(numbers)), 1, len(numbers))):
-        out += str(x)
-    return out
+    state, lookup = doit(numbers, len(numbers), 100)
+    x = lookup[0]
+    st = ''
+    for i in range(len(numbers) - 1):
+        x = state[x['next']]
+        st += str(x['number'])
+    return st
 
 def part_b(numbers):
-    m = max(numbers)
-    numbers = numbers + list(range(m + 1, 1000001))
-    step_times(numbers, 10)
+    state, lookup = doit(numbers, 1000000, 10000000)
+    one = lookup[0]
+    one_next = state[one['next']]
+    one_next_next = state[one_next['next']]
+
+    print(one)
+    print(one_next)
+    print(one_next_next)
+
+    return one_next['number']*one_next_next['number']
 
 if __name__ == '__main__':
     example1 = prepare('''389125467
 ''')
 
-    print(part_a(example1))
+    print(part_b(example1))
